@@ -36,6 +36,19 @@ functions:
       - http:
           path: mint
           method: post
+  get:
+    handler: dist/handler.get
+    events:
+      - http:
+          path: get
+          method: post
+  list:
+    handler: dist/handler.list
+    events:
+      - http:
+          path: list
+          method: post
+
 plugins:
   #- serverless-dynamodb-local
   - serverless-offline
