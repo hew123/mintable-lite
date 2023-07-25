@@ -1,4 +1,4 @@
-service: taco-gallery
+service: mintable-lite
 
 provider:
   name: aws
