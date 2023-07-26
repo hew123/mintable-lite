@@ -16,10 +16,30 @@ MintableLite is an API service where users can mint, list and sell their NFTs. E
 - `yarn start`
 
 
-## Local Authentication 
-- Attach `userId` to the headers of API calls to the local server endpoint
-- Refer to `src/auth` for a list of tokens allowed
+### Local Authentication 
+- For every API call to the local server, attach `authToken` to the headers
+- Refer to `src/auth` for a list of auth tokens allowed
+- `authToken` is a naive implementation which is decoded to retrieve corresponding user IDs
 
 
 ### Mint a token
+- creates a token with various fields: `mintId`, `name`, `description`, `image`
+- returns a token with specified fields and the user ID used to create
+- send POST request to `http://localhost:3000/dev/mint`
 - Include in the API call body with the following fields: `mintId`, `name`, `description`, `image`
+- example: `curl -d '{"mintId":"token_001","image":"hehe","name":"Al pastor","description":"A good taco"}' -H "authToken: [token]" -X POST http://localhost:3000/dev/mint`
+
+
+### Get a token
+- gets a token by mint ID that was specified in token creation (mint token) by the same user
+- returns a token with specified fields if found
+- returns 404 if token is not found by mint ID
+- send GET request to `http://localhost:3000/dev/get/{mintId}`
+- Include in the API call query string with the mint token ID
+- example: `curl -H "authToken: [token]" -X GET http://localhost:3000/dev/get/token_001`
+
+
+### List tokens
+- returns a set of tokens created by the authenticated user
+- send GET request to `http://localhost:3000/dev/list`
+- example: `curl -H "authToken: [token]" -X GET http://localhost:3000/dev/list`

@@ -13,7 +13,6 @@ export class MintablePersistenceService {
         readonly tableName: string
     ) {}
 
-    // TODO: finalise output
     async mintToken(tokenInput: Mintable): Promise<Mintable> {
         const input = {
             "Item": {
@@ -45,7 +44,6 @@ export class MintablePersistenceService {
         return tokenInput;
     }
 
-    // TODO: finalise output
     async getToken(userId: string, mintId: string): Promise<Mintable|null> {
         const input = {
             "Key": {
@@ -65,7 +63,7 @@ export class MintablePersistenceService {
             throw new Error('Getting token failed')
         }
         const token = response.Item
-        return token ?{
+        return token ? {
             userId: token.userId.S as string,
             mintId: token.mintId.S as string,
             name: token.name.S as string,
@@ -74,7 +72,6 @@ export class MintablePersistenceService {
         }: null;
     }
 
-    // TODO: finalise output
     async listTokens(userId: string): Promise<Mintable[]> {
         const input = {
             "ExpressionAttributeValues": {
