@@ -3,9 +3,10 @@
 MintableLite is an API service where users can mint, list and sell their NFTs. Every NFT has name, description, image / animation attributes. Users must be authenticated to mint, sell or buy an item. The app should have three endpoints to list all minted items, mint an item and get details of an item.
 
 
-## To deploy
-- make sure you have aws account setup
-- `yarn sls deploy`
+## Implementaion
+The task is implemented in the AWS serverless approach. API gateway is used to receive API requests with 3 lambdas sitting behind, each representing one endpoint. Then DynamoDB is used to store the NFT token information as a schemaless DB solution. A local naive auth mechanism with a local user store (in the code) is used for auth purpose. It should be replaced with AWS cognito for production as a managed auth service.
+
+Serverless framework is used to spin up the local AWS resources. It is a smart framework that allows engineers to deploy AWS resources to production easily when AWS account has been setup, with one simple command: `yarn sls deploy`
 
 
 ## To run server locally
@@ -19,7 +20,7 @@ MintableLite is an API service where users can mint, list and sell their NFTs. E
 ### Local Authentication 
 - For every API call to the local server, attach `authToken` to the headers
 - Refer to `src/auth` for a list of auth tokens allowed
-- `authToken` is a naive implementation which is decoded to retrieve corresponding user IDs
+- `authToken` is a naive implementation of auth token which is then decoded to retrieve corresponding user IDs
 
 
 ### Mint a token
