@@ -9,7 +9,8 @@ MintableLite is an API service where users can mint, list and sell their NFTs. E
 
 
 ## To run server locally
-- make sure you have `yarn` installed via homebrew
+- make sure you have `yarn` installed (e.g. via homebrew)
 - `yarn install`
+- `yarn serverless dynamodb install` to install local DynamoDB java program (requires Java to be installed). This isn't required if a DynamoDb docker image is used instead. (Refer to https://www.npmjs.com/package/serverless-dynamodb to learn about running DynamoDB locally in Docker)
 - `yarn build`
 - `yarn start`

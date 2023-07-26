@@ -4,4 +4,7 @@ node_modules
 # compiled JS files
 dist
 
+# ddb
+.dynamodb
+
 # Note that yarn.lock is commited because we wanna lock the versions of dependencies
