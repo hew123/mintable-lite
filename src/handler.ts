@@ -1,4 +1,4 @@
-import { DynamoDBClient, PutItemCommand, QueryCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, PutItemCommand, QueryCommand, GetItemCommand } from '@aws-sdk/client-dynamodb';
 
 const client = new DynamoDBClient({
   region: 'localhost',
@@ -8,6 +8,10 @@ const client = new DynamoDBClient({
     secretAccessKey: 'MockSecretAccessKey'
   },
 })
+
+const MINT_ID = 'mintId'
+const USER_ID = 'userId'
+const TABLE_NAME = 'mintable'
 
 
 const RESPONSE_200 = {
@@ -30,21 +34,24 @@ const wrapper = (body: object) => {
 export const mint = async() => {
     const input = {
         "Item": {
-          "mintId": {
-            "S": "token_001"
-          },  
-          "AlbumTitle": {
-            "S": "Somewhat Famous"
-          },
-          "Artist": {
-            "S": "No One You Know"
-          },
-          "SongTitle": {
-            "S": "Call Me Today"
-          }
+            "userId": {
+                "S": "user_001"
+              },  
+            "mintId": {
+                "S": "token_001"
+            },
+            "name": {
+                "S": "Somewhat Famous"
+            },
+            "description": {
+                "S": "No One You Know"
+            },
+            "image": {
+                "S": "Call Me Today"
+            }
         },
         "ReturnConsumedCapacity": "TOTAL",
-        "TableName": "mintable"
+        "TableName": TABLE_NAME
       };
       const command = new PutItemCommand(input);
       const response = await client.send(command);
@@ -54,21 +61,33 @@ export const mint = async() => {
 
 export const get = async() => {
     const input = {
-        "ExpressionAttributeValues": {
-          ":mintId": {
-            "S": 'token_001'
+        "Key": {
+          "userId": {
+            "S": "user_001"
+          },
+          "mintId": {
+            "S": "token_001"
           }
         },
-        "KeyConditionExpression": "mintId = :mintId",
-        //"ProjectionExpression": "SongTitle",
-        "TableName": "mintable"
+        "TableName": TABLE_NAME
       };
-      const command = new QueryCommand(input);
+      const command = new GetItemCommand(input);
       const response = await client.send(command);
     return wrapper({ message: 'get success', response})
 }
 
 export const list = async() => {
-    return wrapper({ message: 'list success'})
+    const input = {
+        "ExpressionAttributeValues": {
+            ":userId": {
+                "S": 'user_001'
+              },
+        },
+        "KeyConditionExpression": "userId = :userId",
+        "TableName": TABLE_NAME
+      };
+      const command = new QueryCommand(input);
+      const response = await client.send(command);
+    return wrapper({ message: 'list success', response})
 }
 

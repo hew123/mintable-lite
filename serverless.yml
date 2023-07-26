@@ -46,11 +46,15 @@ resources:
       Properties:
         TableName: ${self:provider.environment.TABLE_NAME}
         AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
           - AttributeName: mintId
             AttributeType: S
         KeySchema:
-          - AttributeName: mintId
+          - AttributeName: userId
             KeyType: HASH
+          - AttributeName: mintId
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
