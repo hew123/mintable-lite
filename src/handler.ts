@@ -7,7 +7,7 @@ import {
     Context,
     APIGatewayProxyResult,
 } from 'aws-lambda'
-import { get_user_id } from './auth';
+import { authenticate } from './auth';
 import { Mintable } from './dto';
 import { MintablePersistenceService } from './persistance';
 
@@ -45,9 +45,8 @@ const wrapper = (body: object) => {
 export const mintToken: Handler = async(event: APIGatewayEvent, context: Context)
     : Promise<APIGatewayProxyResult> => {
     console.log(event);
-    const authToken = event.headers?.authToken;
-    const userId = get_user_id(authToken)
-    if (!userId) {
+    const { success, userId} = authenticate(event)
+    if (!success) {
         throw new Error('Unauthenticated')
     }
     if (!event.body) {
@@ -55,7 +54,7 @@ export const mintToken: Handler = async(event: APIGatewayEvent, context: Context
     }
     const eventBody = JSON.parse(event.body)
     const tokenInput: Mintable = {
-        userId: userId,
+        userId: userId!,
         mintId: eventBody.mintId,
         name: eventBody.name,
         description: eventBody.description,
@@ -70,12 +69,14 @@ export const getToken: Handler = async(event: APIGatewayEvent, context: Context)
 : Promise<APIGatewayProxyResult> => {
     console.log(event);
     const mintId = event.pathParameters?.mintId;
-    const authToken = event.headers?.authToken;
-    const userId = get_user_id(authToken)
-    if (!mintId || !userId) {
+    const { success, userId} = authenticate(event)
+    if (!success) {
+        throw new Error('Unauthenticated')
+    }
+    if (!mintId) {
         throw new Error('Bad request')
     }
-    const response = await mintablePersistenceService.getToken(userId, mintId);
+    const response = await mintablePersistenceService.getToken(userId!, mintId);
     return wrapper({ message: 'get success', response})
 }
 
@@ -83,12 +84,11 @@ export const getToken: Handler = async(event: APIGatewayEvent, context: Context)
 export const listTokens: Handler = async(event: APIGatewayEvent, context: Context)
 : Promise<APIGatewayProxyResult> => {
     console.log(event);
-    const authToken = event.headers?.authToken;
-    const userId = get_user_id(authToken)
-    if (!userId) {
+    const { success, userId } = authenticate(event)
+    if (!success) {
         throw new Error('Unauthenticated')
     }
-    const response = await mintablePersistenceService.listTokens(userId);
+    const response = await mintablePersistenceService.listTokens(userId!);
     return wrapper({ message: 'list success', response})
 }
 
