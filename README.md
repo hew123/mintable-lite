@@ -19,3 +19,7 @@ MintableLite is an API service where users can mint, list and sell their NFTs. E
 ## Local Authentication 
 - Attach `userId` to the headers of API calls to the local server endpoint
 - Refer to `src/auth` for a list of tokens allowed
+
+
+### Mint a token
+- Include in the API call body with the following fields: `mintId`, `name`, `description`, `image`

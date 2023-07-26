@@ -61,19 +61,19 @@ resources:
 
 functions:
   mint:
-    handler: dist/handler.mint
+    handler: dist/handler.mintToken
     events:
       - http:
           path: mint
           method: post
   get:
-    handler: dist/handler.get
+    handler: dist/handler.getToken
     events:
       - http:
           path: get/{mintId}
           method: get
   list:
-    handler: dist/handler.list
+    handler: dist/handler.listTokens
     events:
       - http:
           path: list

@@ -1,8 +1,5 @@
 import { 
     DynamoDBClient, 
-    PutItemCommand, 
-    QueryCommand, 
-    GetItemCommand 
 } from '@aws-sdk/client-dynamodb';
 import { 
     APIGatewayEvent,
@@ -11,6 +8,8 @@ import {
     APIGatewayProxyResult,
 } from 'aws-lambda'
 import { get_user_id } from './auth';
+import { Mintable } from './dto';
+import { MintablePersistenceService } from './persistance';
 
 // TODO: pull out env vars
 // TODO: dependency injection
@@ -22,11 +21,8 @@ const client = new DynamoDBClient({
     secretAccessKey: 'MockSecretAccessKey'
   },
 })
-
-const MINT_ID = 'mintId'
-const USER_ID = 'userId'
 const TABLE_NAME = 'mintable'
-
+const mintablePersistenceService = new MintablePersistenceService(client, TABLE_NAME);
 
 const RESPONSE_200 = {
     statusCode: 200,
@@ -45,38 +41,32 @@ const wrapper = (body: object) => {
     return response;
 }
 
-export const mint = async(event: APIGatewayEvent, context: Context)
+// TODO: return response other than 200 e.g. bad request, token not found
+export const mintToken: Handler = async(event: APIGatewayEvent, context: Context)
     : Promise<APIGatewayProxyResult> => {
     console.log(event);
-    const input = {
-        "Item": {
-            "userId": {
-                "S": "user_001"
-              },  
-            "mintId": {
-                "S": "token_001"
-            },
-            "name": {
-                "S": "Somewhat Famous"
-            },
-            "description": {
-                "S": "No One You Know"
-            },
-            "image": {
-                "S": "Call Me Today"
-            }
-        },
-        "ReturnConsumedCapacity": "TOTAL",
-        "TableName": TABLE_NAME
-      };
-      const command = new PutItemCommand(input);
-      const response = await client.send(command);
-
+    const authToken = event.headers?.authToken;
+    const userId = get_user_id(authToken)
+    if (!userId) {
+        throw new Error('Unauthenticated')
+    }
+    if (!event.body) {
+        throw new Error('Empty request body')
+    }
+    const eventBody = JSON.parse(event.body)
+    const tokenInput: Mintable = {
+        userId: userId,
+        mintId: eventBody.mintId,
+        name: eventBody.name,
+        description: eventBody.description,
+        image: eventBody.image
+    }
+    const response = await mintablePersistenceService.mintToken(tokenInput);
     return wrapper({ message: 'mint success', response})
 }
 
 // TODO: return response other than 200 e.g. bad request, token not found
-export const get = async(event: APIGatewayEvent, context: Context)
+export const getToken: Handler = async(event: APIGatewayEvent, context: Context)
 : Promise<APIGatewayProxyResult> => {
     console.log(event);
     const mintId = event.pathParameters?.mintId;
@@ -85,36 +75,20 @@ export const get = async(event: APIGatewayEvent, context: Context)
     if (!mintId || !userId) {
         throw new Error('Bad request')
     }
-    const input = {
-        "Key": {
-          "userId": {
-            "S": userId
-          },
-          "mintId": {
-            "S": mintId
-          }
-        },
-        "TableName": TABLE_NAME
-      };
-      const command = new GetItemCommand(input);
-      const response = await client.send(command);
+    const response = await mintablePersistenceService.getToken(userId, mintId);
     return wrapper({ message: 'get success', response})
 }
 
-export const list = async(event: APIGatewayEvent, context: Context)
+// TODO: return response other than 200 e.g. bad request, token not found
+export const listTokens: Handler = async(event: APIGatewayEvent, context: Context)
 : Promise<APIGatewayProxyResult> => {
     console.log(event);
-    const input = {
-        "ExpressionAttributeValues": {
-            ":userId": {
-                "S": 'user_001'
-              },
-        },
-        "KeyConditionExpression": "userId = :userId",
-        "TableName": TABLE_NAME
-      };
-      const command = new QueryCommand(input);
-      const response = await client.send(command);
+    const authToken = event.headers?.authToken;
+    const userId = get_user_id(authToken)
+    if (!userId) {
+        throw new Error('Unauthenticated')
+    }
+    const response = await mintablePersistenceService.listTokens(userId);
     return wrapper({ message: 'list success', response})
 }
 
