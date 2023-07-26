@@ -70,7 +70,7 @@ functions:
     handler: dist/handler.get
     events:
       - http:
-          path: get
+          path: get/{mintId}
           method: get
   list:
     handler: dist/handler.list

@@ -1,5 +1,19 @@
-import { DynamoDBClient, PutItemCommand, QueryCommand, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { 
+    DynamoDBClient, 
+    PutItemCommand, 
+    QueryCommand, 
+    GetItemCommand 
+} from '@aws-sdk/client-dynamodb';
+import { 
+    APIGatewayEvent,
+    Handler,
+    Context,
+    APIGatewayProxyResult,
+} from 'aws-lambda'
+import { get_user_id } from './auth';
 
+// TODO: pull out env vars
+// TODO: dependency injection
 const client = new DynamoDBClient({
   region: 'localhost',
   endpoint: 'http://0.0.0.0:8000',
@@ -31,7 +45,9 @@ const wrapper = (body: object) => {
     return response;
 }
 
-export const mint = async() => {
+export const mint = async(event: APIGatewayEvent, context: Context)
+    : Promise<APIGatewayProxyResult> => {
+    console.log(event);
     const input = {
         "Item": {
             "userId": {
@@ -59,14 +75,23 @@ export const mint = async() => {
     return wrapper({ message: 'mint success', response})
 }
 
-export const get = async() => {
+// TODO: return response other than 200 e.g. bad request, token not found
+export const get = async(event: APIGatewayEvent, context: Context)
+: Promise<APIGatewayProxyResult> => {
+    console.log(event);
+    const mintId = event.pathParameters?.mintId;
+    const authToken = event.headers?.authToken;
+    const userId = get_user_id(authToken)
+    if (!mintId || !userId) {
+        throw new Error('Bad request')
+    }
     const input = {
         "Key": {
           "userId": {
-            "S": "user_001"
+            "S": userId
           },
           "mintId": {
-            "S": "token_001"
+            "S": mintId
           }
         },
         "TableName": TABLE_NAME
@@ -76,7 +101,9 @@ export const get = async() => {
     return wrapper({ message: 'get success', response})
 }
 
-export const list = async() => {
+export const list = async(event: APIGatewayEvent, context: Context)
+: Promise<APIGatewayProxyResult> => {
+    console.log(event);
     const input = {
         "ExpressionAttributeValues": {
             ":userId": {

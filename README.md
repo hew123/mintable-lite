@@ -14,3 +14,8 @@ MintableLite is an API service where users can mint, list and sell their NFTs. E
 - `yarn serverless dynamodb install` to install local DynamoDB java program (requires Java to be installed). This isn't required if a DynamoDb docker image is used instead. (Refer to https://www.npmjs.com/package/serverless-dynamodb to learn about running DynamoDB locally in Docker)
 - `yarn build`
 - `yarn start`
+
+
+## Local Authentication 
+- Attach `userId` to the headers of API calls to the local server endpoint
+- Refer to `src/auth` for a list of tokens allowed
