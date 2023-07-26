@@ -7,12 +7,10 @@ import {
     Context,
     APIGatewayProxyResult,
 } from 'aws-lambda'
-import { authenticate } from './auth';
-import { Mintable } from './dto';
+import { MintableController } from './controller';
 import { MintablePersistenceService } from './persistance';
 
-// TODO: pull out env vars
-// TODO: dependency injection
+// TechDebt: pull out env vars
 const client = new DynamoDBClient({
   region: 'localhost',
   endpoint: 'http://0.0.0.0:8000',
@@ -22,73 +20,47 @@ const client = new DynamoDBClient({
   },
 })
 const TABLE_NAME = 'mintable'
-const mintablePersistenceService = new MintablePersistenceService(client, TABLE_NAME);
-
-const RESPONSE_200 = {
-    statusCode: 200,
+const RESPONSE_HEADERS = {
     headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*' // Enable CORS for all domains. You can restrict this to specific domains if needed.
+         // Enable CORS for all domains. You can restrict this to specific domains if needed.
+        'Access-Control-Allow-Origin': '*'
     }
 }
 
-const wrapper = (body: object) => {
-    const response = {
-        ...RESPONSE_200,
-        body: JSON.stringify(body),
-    };
-    console.log(response);
-    return response;
-}
+const mintablePersistenceService = new MintablePersistenceService(client, TABLE_NAME);
+const mintableController = new MintableController(mintablePersistenceService);
 
-// TODO: return response other than 200 e.g. bad request, token not found
 export const mintToken: Handler = async(event: APIGatewayEvent, context: Context)
     : Promise<APIGatewayProxyResult> => {
     console.log(event);
-    const { success, userId} = authenticate(event)
-    if (!success) {
-        throw new Error('Unauthenticated')
+    const response = await mintableController.mintToken(event);
+    console.log(response)
+    return {
+        ...RESPONSE_HEADERS,
+        ...response
     }
-    if (!event.body) {
-        throw new Error('Empty request body')
-    }
-    const eventBody = JSON.parse(event.body)
-    const tokenInput: Mintable = {
-        userId: userId!,
-        mintId: eventBody.mintId,
-        name: eventBody.name,
-        description: eventBody.description,
-        image: eventBody.image
-    }
-    const response = await mintablePersistenceService.mintToken(tokenInput);
-    return wrapper({ message: 'mint success', response})
 }
 
-// TODO: return response other than 200 e.g. bad request, token not found
 export const getToken: Handler = async(event: APIGatewayEvent, context: Context)
 : Promise<APIGatewayProxyResult> => {
     console.log(event);
-    const mintId = event.pathParameters?.mintId;
-    const { success, userId} = authenticate(event)
-    if (!success) {
-        throw new Error('Unauthenticated')
+    const response = await mintableController.getToken(event);
+    console.log(response)
+    return {
+        ...RESPONSE_HEADERS,
+        ...response
     }
-    if (!mintId) {
-        throw new Error('Bad request')
-    }
-    const response = await mintablePersistenceService.getToken(userId!, mintId);
-    return wrapper({ message: 'get success', response})
 }
 
-// TODO: return response other than 200 e.g. bad request, token not found
 export const listTokens: Handler = async(event: APIGatewayEvent, context: Context)
 : Promise<APIGatewayProxyResult> => {
     console.log(event);
-    const { success, userId } = authenticate(event)
-    if (!success) {
-        throw new Error('Unauthenticated')
+    const response = await mintableController.listTokens(event);
+    console.log(response)
+    return {
+        ...RESPONSE_HEADERS,
+        ...response
     }
-    const response = await mintablePersistenceService.listTokens(userId!);
-    return wrapper({ message: 'list success', response})
 }
 
