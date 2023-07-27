@@ -16,7 +16,13 @@ const RESPONSE_HEADERS = {
 export class MintableController {
     constructor(
         readonly persistenceService: MintablePersistenceService
-    ) {}
+    ) {
+        // This is required because we are 
+        // referencing these methods outside this class
+        this.mintToken = this.mintToken.bind(this);
+        this.getToken = this.getToken.bind(this);
+        this.listTokens = this.listTokens.bind(this);
+    }
 
     async mintToken(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
         const { success, userId } = authenticate(event)

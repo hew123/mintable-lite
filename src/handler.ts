@@ -23,27 +23,19 @@ const TABLE_NAME = 'mintable'
 const mintablePersistenceService = new MintablePersistenceService(client, TABLE_NAME);
 const mintableController = new MintableController(mintablePersistenceService);
 
-export const mintToken: Handler = async(event: APIGatewayEvent, context: Context)
-    : Promise<APIGatewayProxyResult> => {
-    console.log(event);
-    const response = await mintableController.mintToken(event);
-    console.log(response)
-    return response;
+const genericHandler = 
+    (controller: (event: APIGatewayEvent) => Promise<APIGatewayProxyResult>) => {
+        // TechDebt: should get cognito identity from context for auth
+        return async(event: APIGatewayEvent, context: Context) : Promise<APIGatewayProxyResult> => {
+            console.log(event);
+            const response = await controller(event);
+            console.log(response)
+            return response;
+        }   
 }
 
-export const getToken: Handler = async(event: APIGatewayEvent, context: Context)
-: Promise<APIGatewayProxyResult> => {
-    console.log(event);
-    const response = await mintableController.getToken(event);
-    console.log(response)
-    return response;
-}
+export const mintToken: Handler = genericHandler(mintableController.mintToken)
 
-export const listTokens: Handler = async(event: APIGatewayEvent, context: Context)
-: Promise<APIGatewayProxyResult> => {
-    console.log(event);
-    const response = await mintableController.listTokens(event);
-    console.log(response)
-    return response;
-}
+export const getToken: Handler = genericHandler(mintableController.getToken)
 
+export const listTokens: Handler = genericHandler(mintableController.listTokens)
