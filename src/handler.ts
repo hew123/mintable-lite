@@ -20,14 +20,6 @@ const client = new DynamoDBClient({
   },
 })
 const TABLE_NAME = 'mintable'
-const RESPONSE_HEADERS = {
-    headers: {
-        'Content-Type': 'application/json',
-         // Enable CORS for all domains. You can restrict this to specific domains if needed.
-        'Access-Control-Allow-Origin': '*'
-    }
-}
-
 const mintablePersistenceService = new MintablePersistenceService(client, TABLE_NAME);
 const mintableController = new MintableController(mintablePersistenceService);
 
@@ -36,10 +28,7 @@ export const mintToken: Handler = async(event: APIGatewayEvent, context: Context
     console.log(event);
     const response = await mintableController.mintToken(event);
     console.log(response)
-    return {
-        ...RESPONSE_HEADERS,
-        ...response
-    }
+    return response;
 }
 
 export const getToken: Handler = async(event: APIGatewayEvent, context: Context)
@@ -47,10 +36,7 @@ export const getToken: Handler = async(event: APIGatewayEvent, context: Context)
     console.log(event);
     const response = await mintableController.getToken(event);
     console.log(response)
-    return {
-        ...RESPONSE_HEADERS,
-        ...response
-    }
+    return response;
 }
 
 export const listTokens: Handler = async(event: APIGatewayEvent, context: Context)
@@ -58,9 +44,6 @@ export const listTokens: Handler = async(event: APIGatewayEvent, context: Contex
     console.log(event);
     const response = await mintableController.listTokens(event);
     console.log(response)
-    return {
-        ...RESPONSE_HEADERS,
-        ...response
-    }
+    return response;
 }
 
