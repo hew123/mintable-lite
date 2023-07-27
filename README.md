@@ -8,6 +8,8 @@ The task is implemented in the AWS serverless approach. API gateway is used to r
 
 Serverless framework is used to spin up the local AWS resources. It is a smart framework that allows engineers to deploy AWS resources to production easily when AWS account has been setup, with one simple command: `yarn sls deploy`
 
+Please refer to `./diagram.png` for architecture diagram.
+
 
 ## To run server locally
 - make sure you have `yarn` installed (e.g. via homebrew)
@@ -19,7 +21,7 @@ Serverless framework is used to spin up the local AWS resources. It is a smart f
 
 ### Local Authentication 
 - For every API call to the local server, attach `authToken` to the headers
-- Refer to `src/auth` for a list of auth tokens allowed
+- Refer to `./src/auth` for a list of auth tokens allowed
 - `authToken` is a naive implementation of auth token which is then decoded to retrieve corresponding user IDs
 
 
