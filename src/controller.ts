@@ -16,7 +16,7 @@ export class MintableController {
     ) {}
 
     async mintToken(event: APIGatewayEvent): Promise<PartialHttpResp> {
-        const { success, userId} = authenticate(event)
+        const { success, userId } = authenticate(event)
         if (!success) {
             return {
                 statusCode: 403,
@@ -60,7 +60,7 @@ export class MintableController {
     }
 
     async getToken(event: APIGatewayEvent): Promise<PartialHttpResp> {
-        const { success, userId} = authenticate(event)
+        const { success, userId } = authenticate(event)
         if (!success) {
             return {
                 statusCode: 403,
@@ -97,7 +97,7 @@ export class MintableController {
     }
 
     async listTokens(event: APIGatewayEvent): Promise<PartialHttpResp> {
-        const { success, userId} = authenticate(event)
+        const { success, userId } = authenticate(event)
         if (!success) {
             return {
                 statusCode: 403,

@@ -2,8 +2,9 @@ import {
     APIGatewayEvent,
 } from 'aws-lambda'
 
-// For simple auth purpose only
-// Should use amazon cognito pool + JWT token
+// Auth token to user ID mapping.
+// For simple auth purpose only.
+// Should replace with amazon cognito pool + JWT token for production
 const USER_AUTH_MAPPING = {
     'oaifj3902i40931340': 'user_001',
     'r230o8ujflsdmldpod': 'user_002',
