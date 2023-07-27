@@ -19,3 +19,12 @@ export function authenticate(event: APIGatewayEvent): {success: boolean, userId:
         userId: userId?? null
     }
 }
+
+export const UNAUTHENTICATED_RESP = {
+    statusCode: 403,
+    body: "Unauthenticated",
+    headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    }
+}

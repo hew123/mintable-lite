@@ -7,6 +7,7 @@ import {
     Context,
     APIGatewayProxyResult,
 } from 'aws-lambda'
+import { authenticate, UNAUTHENTICATED_RESP } from './auth';
 import { MintableController } from './controller';
 import { MintablePersistenceService } from './persistance';
 
@@ -24,11 +25,15 @@ const mintablePersistenceService = new MintablePersistenceService(client, TABLE_
 const mintableController = new MintableController(mintablePersistenceService);
 
 const genericHandler = 
-    (controller: (event: APIGatewayEvent) => Promise<APIGatewayProxyResult>) => {
-        // TechDebt: should get cognito identity from context for auth
+    (controller: (event: APIGatewayEvent, userId: string) => Promise<APIGatewayProxyResult>) => {
         return async(event: APIGatewayEvent, context: Context) : Promise<APIGatewayProxyResult> => {
             console.log(event);
-            const response = await controller(event);
+            // TechDebt: should get cognito identity from context for auth
+            const { success, userId } = authenticate(event)
+            if (!success) {
+                return UNAUTHENTICATED_RESP
+            }
+            const response = await controller(event, userId!);
             console.log(response)
             return response;
         }   

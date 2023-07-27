@@ -3,7 +3,6 @@ import {
     APIGatewayEvent,
     APIGatewayProxyResult
 } from 'aws-lambda'
-import { authenticate } from "./auth";
 import { Mintable } from "./dto";
 
 const RESPONSE_HEADERS = {
@@ -24,15 +23,7 @@ export class MintableController {
         this.listTokens = this.listTokens.bind(this);
     }
 
-    async mintToken(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
-        const { success, userId } = authenticate(event)
-        if (!success) {
-            return {
-                statusCode: 403,
-                body: "Unauthenticated",
-                ...RESPONSE_HEADERS
-            }
-        }
+    async mintToken(event: APIGatewayEvent, userId: string): Promise<APIGatewayProxyResult> {
         if (!event.body) {
             return {
                 statusCode: 400,
@@ -49,7 +40,7 @@ export class MintableController {
             }
         }
         const tokenInput: Mintable = {
-            userId: userId!,
+            userId: userId,
             mintId: eventBody.mintId,
             name: eventBody.name,
             description: eventBody.description,
@@ -73,15 +64,7 @@ export class MintableController {
         }
     }
 
-    async getToken(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
-        const { success, userId } = authenticate(event)
-        if (!success) {
-            return {
-                statusCode: 403,
-                body: "Unauthenticated",
-                ...RESPONSE_HEADERS
-            }
-        }
+    async getToken(event: APIGatewayEvent, userId: string): Promise<APIGatewayProxyResult> {
         const mintId = event.pathParameters?.mintId;
         if (!mintId) {
             return {
@@ -91,7 +74,7 @@ export class MintableController {
             }
         }
         try {
-            const response = await this.persistenceService.getToken(userId!, mintId);
+            const response = await this.persistenceService.getToken(userId, mintId);
             if (!response) {
                 return {
                     statusCode: 404,
@@ -115,17 +98,9 @@ export class MintableController {
         }
     }
 
-    async listTokens(event: APIGatewayEvent): Promise<APIGatewayProxyResult> {
-        const { success, userId } = authenticate(event)
-        if (!success) {
-            return {
-                statusCode: 403,
-                body: "Unauthenticated",
-                ...RESPONSE_HEADERS
-            }
-        }
+    async listTokens(event: APIGatewayEvent, userId: string): Promise<APIGatewayProxyResult> {
         try {
-            const response = await this.persistenceService.listTokens(userId!);
+            const response = await this.persistenceService.listTokens(userId);
             return {
                 statusCode: 200,
                 body: JSON.stringify(response),
